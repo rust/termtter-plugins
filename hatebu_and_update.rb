@@ -6,7 +6,7 @@ require 'nokogiri'
 
 module Termtter::Client
   register_command(
-    :name => :hatebu2, :aliases => [],
+    :name => :hatebu_and_update, :aliases => [:hau],
     :exec_proc => lambda {|arg|
       url, comment = arg.split(/\s/)
       if url =~ URI.regexp
@@ -50,9 +50,9 @@ module Termtter::Client
 end
 
 # hatebu.rb
-# hatena bookmark it!
+# hatena bookmark it, and post
 #
 # config.plugins.hatebu.username = 'your-username-on-hatena'
 # config.plugins.hatebu.password = 'your-password-on-hatena'
 #
-#   hatebu 1114860346 [termtter][<82>±<82>ê<82>Í<82>·<82>²<82>¢]mattn++
+#   hatebu_and_update http://www.yahoo.co.jp/ [yahoo]
