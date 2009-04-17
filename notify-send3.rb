@@ -3,7 +3,7 @@
 require 'fileutils'
 require 'RMagick'
 
-# notify-send.rb からコピペ。共通化したいところ。
+# Copy from notify-send2.rb
 config.plugins.notify_send.set_default(:icon_cache_dir, "#{Termtter::CONF_DIR}/tmp/user_profile_images")
 def get_icon_path(s)
   FileUtils.mkdir_p(config.plugins.notify_send.icon_cache_dir) unless File.exist?(config.plugins.notify_send.icon_cache_dir)
@@ -41,3 +41,5 @@ Termtter::Client.register_hook(
   }
 )
 
+# notify-send3.rb
+#   caching resized profile image.

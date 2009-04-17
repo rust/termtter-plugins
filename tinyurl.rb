@@ -15,3 +15,6 @@ Termtter::Client.register_hook(
     end
   }
 )
+
+# tinyuri.rb
+# make URLs in your update to convert tinyurl.com/XXXXXXX.

@@ -2,28 +2,22 @@
 
 require 'rubygems'
 require 'atomutil'
+require 'nokogiri'
 
 module Termtter::Client
   register_command(
     :name => :hatebu2, :aliases => [],
     :exec_proc => lambda {|arg|
-      if arg =~ /^(\d+)(.*)$/
-        id = $1.strip
-        comment = $2.strip
-        statuses = public_storage[:log].select { |s| s.id == id }
-        unless statuses.empty?
-          status = statuses.first
-        else
-          status = t.show(id).first
-        end
+      url, comment = arg.split(/\s/)
+      if url =~ URI.regexp
         auth = auth = Atompub::Auth::Wsse.new({
             :username => config.plugins.hatebu.username,
             :password => config.plugins.hatebu.password,
         })
         link = Atom::Link.new({
-           :href => "http://twitter.com/#{status.user.screen_name}/status/#{status.id}",
-           :rel => 'related',
-           :type => 'text/html',
+            :href => url,
+            :rel => 'related',
+            :type => 'text/html',
         })
         entry = Atom::Entry.new({
             :link => link,
@@ -36,18 +30,23 @@ module Termtter::Client
         req['Slug'] = 'termtter'
         req.body = entry.to_s
         auth.authorize(req)
-        Net::HTTP.start('b.hatena.ne.jp', 80) do |http|
+        title = nil
+        tinyurl = nil
+        Termtter::API.connection.start('b.hatena.ne.jp', 80) do |http|
           res = http.request(req)
+          title = Nokogiri::XML(res.body).search('link[title]').first['title'] rescue nil
+        end
+        if title
+          Termtter::API.connection.start('tinyurl.com', 80) do |http|
+            tinyurl = http.get('/api-create.php?url=' + URI.escape(url)).body
+          end
+
+          Termtter::API.twitter.update("[はてぶ] #{title} #{tinyurl}")
         end
       end
     },
-    :completion_proc => lambda {|cmd, args|
-      if args =~ /^(\d*)$/
-        find_status_id_candidates $1, "#{cmd} %s"
-      end
-    },
-        :help => ['hatebu ID', 'Hatena bookmark a status']
-  )
+    :help => ['hatebu2 URL', 'Hatena bookmark a URL, and update']
+    )
 end
 
 # hatebu.rb
